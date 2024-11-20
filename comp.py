@@ -47,10 +47,10 @@ if players:
             with cols[i % num_cols]:
                 st.subheader(f"{column} Comparison")
 
-                chart = alt.Chart(data).mark_bar().encode(
+                chart = alt.Chart(data).mark_bar(cornerRadiusTopLeft=3,cornerRadiusTopRight=3).encode(
                     x=alt.X('Player:N', sort=None, axis=alt.Axis(labelAngle=0)),
                     y='Value:Q',
-                    color=["#fd0", "#f0f", "#04f"],
+                    color=alt.Color('Value:Q', scale=alt.Scale(domain=[min(data['Value']), max(data['Value'])], range=["#a8dadc", "#f1faee", "#2a9d8f"])),
                 ).properties(width=500, height=400)
 
                 text = chart.mark_text(
@@ -62,6 +62,6 @@ if players:
                     text='Value:O'
                 )
 
-                st.altair_chart(chart + text)
+                st.altair_chart(chart + text, theme='streamlit')
 else:
     st.write("Please select at least one player to compare.")

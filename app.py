@@ -3,7 +3,6 @@ import pandas as pd
 import json
 import os
 
-# League information
 league_info = {
     'Bundesliga': {'id': 54, 'season': 23794},
     'La Liga': {'id': 87, 'season': 23686},
@@ -81,13 +80,11 @@ def fetch_team_data(league_name, stat_name):
     response = requests.get('https://www.fotmob.com/api/leagueseasondeepstats', params=params, cookies=cookies, headers=headers)
     data = response.json()
 
-    # İstatistik verilerini al
     stats_data = data['statsData']
     names = [item['name'] for item in stats_data]
     stat_values = [item['statValue']['value'] for item in stats_data]
     player_ids = [item['id'] for item in stats_data]
 
-    # DataFrame oluştur
     df = pd.DataFrame({
         'Oyuncu': names,
         stat_name: stat_values,
@@ -102,38 +99,30 @@ def compare_teams(league_name, stat_names):
     for stat_name in stat_names:
         df_team = fetch_team_data(league_name, stat_name)
 
-        # İstatistikleri sözlükte sakla
         for _, row in df_team.iterrows():
             if row['Oyuncu'] not in combined_stats:
-                combined_stats[row['Oyuncu']] = {'Oyuncu Resmi': row['Oyuncu Resmi']}  # Oyuncu resmini ekle
+                combined_stats[row['Oyuncu']] = {'Oyuncu Resmi': row['Oyuncu Resmi']}
             # Değerleri yuvarlayarak ekle
             combined_stats[row['Oyuncu']][stat_name] = round(row[stat_name], 1)
 
-    # DataFrame oluştur
     final_df = pd.DataFrame(combined_stats).T
     final_df.reset_index(inplace=True)
     final_df.rename(columns={'index': 'Oyuncu'}, inplace=True)
-
-    # NaN değerlerini 0.0 ile doldur
     final_df.fillna(0.0, inplace=True)
 
     return final_df
 
 # Örnek kullanım
-stat_names = list(player_stats.keys())  # Tüm istatistik isimlerini al
+stat_names = list(player_stats.keys())
 
-# JSON dosyalarını kaydedeceğimiz klasörün adı
 output_dir = 'jsons'
 
-# Klasörün var olup olmadığını kontrol et, yoksa oluştur
 if not os.path.exists(output_dir):
     os.makedirs(output_dir)
 
-# Tüm ligler için verileri oluştur ve JSON dosyalarına kaydet
 for league in league_info.keys():
     team_stats_df = compare_teams(league, stat_names)
 
-    # JSON verisini bir dosyaya yaz
     team_stats_json = team_stats_df.set_index('Oyuncu').T.to_json(orient='index')
     file_name = f"{league}.json"
     file_path = os.path.join(output_dir, file_name)

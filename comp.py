@@ -33,7 +33,7 @@ with st.sidebar:
 
 if players:
     filtered_df = df[df.index.isin(players)]
-    st.write(f"Comparing selected players in {selected_league} league:")
+    st.write(f"Comparing selected players in {selected_league}:")
 
     # 2 kolon için Streamlit columns kullanımı
     num_cols = 2

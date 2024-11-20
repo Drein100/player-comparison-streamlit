@@ -48,7 +48,7 @@ if players:
                 st.subheader(f"{column} Comparison")
 
                 chart = alt.Chart(data).mark_bar(cornerRadiusTopLeft=3,cornerRadiusTopRight=3).encode(
-                    x=alt.X('Player:N', sort=None, axis=alt.Axis(labelAngle=0)),
+                    x=alt.X('Player:N', sort=None, axis=alt.Axis(labelAngle=-45)),
                     y='Value:Q',
                     color=alt.Color('Value:Q', scale=alt.Scale(domain=[min(data['Value']), max(data['Value'])], range=["#a8dadc", "#f1faee", "#2a9d8f"])),
                 ).properties(width=500, height=400)

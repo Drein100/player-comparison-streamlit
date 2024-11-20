@@ -20,6 +20,7 @@ league_data = load_league_data()
 
 st.set_page_config(layout="wide")
 st.header("Player Comparison Dashboard")
+st.text("data is taken from FotMob")
 
 with st.sidebar:
     st.header("Select League and Players")
@@ -35,18 +36,15 @@ if players:
     filtered_df = df[df.index.isin(players)]
     st.write(f"Comparing selected players in {selected_league}:")
 
-    # 2 kolon için Streamlit columns kullanımı
     num_cols = 2
     cols = st.columns(num_cols)
 
-    # Her kolon için bir grafik oluştur
     for i, column in enumerate(filtered_df.columns):
         if column != 'Oyuncu Resmi': 
             data = filtered_df[column].reset_index()
             data.columns = ['Player', 'Value']
             data = data.sort_values(by='Value', ascending=False)
 
-            # Her grafiği sırasıyla iki kolona yerleştir
             with cols[i % num_cols]:
                 st.subheader(f"{column} Comparison")
 

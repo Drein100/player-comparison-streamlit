@@ -20,8 +20,7 @@ league_data = load_league_data()
 
 st.set_page_config(layout="wide")
 st.header("Player Comparison Dashboard")
-st.text("data is taken from FotMob")
-
+st.markdown(f"<span style='background-color:{'#00f900'}; opacity:0.2; '>data is taken from FotMob</span>", True)
 with st.sidebar:
     st.header("Select League and Players")
 

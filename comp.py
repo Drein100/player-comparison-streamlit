@@ -54,7 +54,7 @@ if players:
                     x=alt.X('Player:N', sort=None, axis=alt.Axis(labelAngle=0)),
                     y='Value:Q',
                     color='Value:O',
-                ).properties(width=600, height=400)
+                ).properties(width=500, height=400)
 
                 text = chart.mark_text(
                     align='center',

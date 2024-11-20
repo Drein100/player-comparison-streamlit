@@ -51,7 +51,7 @@ player_stats = {
 }
 
 def fetch_team_data(league_name, stat_name):
-    league_name = capitalize_words(league_name)
+    league_name = league_name.capitalize()
 
     cookies = {
         'g_state': '{"i_p":1732114263968,"i_l":1}',
@@ -60,20 +60,15 @@ def fetch_team_data(league_name, stat_name):
 
     headers = {
         'Accept': '*/*',
-        'Sec-Fetch-Site': 'same-origin',
-        'Sec-Fetch-Dest': 'empty',
         'Accept-Language': 'en-US,en;q=0.9',
-        'Sec-Fetch-Mode': 'cors',
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.1 Safari/605.1.15',
         'Referer': f'https://www.fotmob.com/leagues/{league_info[league_name]["id"]}/stats/season/{league_info[league_name]["season"]}/players/{player_stats[stat_name]}',
-        'x-fm-req': 'eyJib2R5Ijp7InVybCI6Ii9hcGkvbGVhZ3Vlc2Vhc29uZGVlcHN0YXRzP2lkPTQyJnNlYXNvbj0yNDExMCZ0eXBlPXBsYXllcnMmc3RhdD13b25fdGFja2xlIiwiY29kZSI6MTczMjEwNzEyNTIwNywiZm9vIjoiNmYzNzkxMTQ5In0sInNpZ25hdHVyZSI6IjI2OTBBRTIyMUIxOTczMkVCMjJGOEZBMTNGRDg5MjlCIn0=',
-        'Priority': 'u=3, i',
     }
 
     league = league_info.get(league_name)
     stat = player_stats.get(stat_name)
 
-    if league is None or stat is None:
+    if not league or not stat:
         raise ValueError("Geçersiz lig adı veya istatistik adı.")
 
     params = {
@@ -90,16 +85,13 @@ def fetch_team_data(league_name, stat_name):
     stats_data = data['statsData']
     names = [item['name'] for item in stats_data]
     stat_values = [item['statValue']['value'] for item in stats_data]
-
-    # Oyuncu ID'lerini ve resim URL'lerini al
     player_ids = [item['id'] for item in stats_data]
-    player_images = [f'https://images.fotmob.com/image_resources/playerimages/{player_id}.png' for player_id in player_ids]
 
     # DataFrame oluştur
     df = pd.DataFrame({
-        'Takım': names,
+        'Oyuncu': names,
         stat_name: stat_values,
-        'Oyuncu Resmi': player_images  # Oyuncu resmini ekle
+        'Oyuncu Resmi': [f'https://images.fotmob.com/image_resources/playerimages/{player_id}.png' for player_id in player_ids]
     })
 
     return df
@@ -111,24 +103,21 @@ def compare_teams(league_name, stat_names):
         df_team = fetch_team_data(league_name, stat_name)
 
         # İstatistikleri sözlükte sakla
-        for index, row in df_team.iterrows():
-            if row['Takım'] not in combined_stats:
-                combined_stats[row['Takım']] = {'Oyuncu Resmi': row['Oyuncu Resmi']}  # Oyuncu resmini ekle
+        for _, row in df_team.iterrows():
+            if row['Oyuncu'] not in combined_stats:
+                combined_stats[row['Oyuncu']] = {'Oyuncu Resmi': row['Oyuncu Resmi']}  # Oyuncu resmini ekle
             # Değerleri yuvarlayarak ekle
-            combined_stats[row['Takım']][stat_name] = round(row[stat_name], 1)
+            combined_stats[row['Oyuncu']][stat_name] = round(row[stat_name], 1)
 
     # DataFrame oluştur
     final_df = pd.DataFrame(combined_stats).T
     final_df.reset_index(inplace=True)
-    final_df.rename(columns={'index': 'Takım'}, inplace=True)
+    final_df.rename(columns={'index': 'Oyuncu'}, inplace=True)
 
     # NaN değerlerini 0.0 ile doldur
     final_df.fillna(0.0, inplace=True)
 
     return final_df
-
-def capitalize_words(text):
-    return ' '.join(word.capitalize() for word in text.split())
 
 # Örnek kullanım
 stat_names = list(player_stats.keys())  # Tüm istatistik isimlerini al
@@ -145,7 +134,7 @@ for league in league_info.keys():
     team_stats_df = compare_teams(league, stat_names)
 
     # JSON verisini bir dosyaya yaz
-    team_stats_json = team_stats_df.set_index('Takım').T.to_json(orient='index')
+    team_stats_json = team_stats_df.set_index('Oyuncu').T.to_json(orient='index')
     file_name = f"{league}.json"
     file_path = os.path.join(output_dir, file_name)
     

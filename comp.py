@@ -50,7 +50,7 @@ if players:
                 chart = alt.Chart(data).mark_bar().encode(
                     x=alt.X('Player:N', sort=None, axis=alt.Axis(labelAngle=0)),
                     y='Value:Q',
-                    color='Value:O',
+                    color=["#fd0", "#f0f", "#04f"],
                 ).properties(width=500, height=400)
 
                 text = chart.mark_text(
